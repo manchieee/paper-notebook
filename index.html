@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex">
+<title>紙トレ手帳</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#f8f5f0; --card:#ffffff; --card2:#fdfaf5;
+  --ink:#2f2b26; --ink2:#7a7168; --line:#e8e0d4;
+  --amber:#c8791f; --amber-d:#a35f13; --amber-l:#fbf1e2;
+  --up:#1f7a4d; --down:#c0392b;
+  --shadow:0 2px 10px rgba(80,66,45,.08);
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px; line-height:1.8; -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+}
+h1,h2,h3,h4,h5,h6{line-height:1.5;margin:0;font-weight:700;}
+a{color:var(--amber-d);}
+header{background:#2f2b26;color:#fdf8f0;padding:14px 18px 12px;}
+.hd-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.hd-title{font-size:20px;font-weight:700;letter-spacing:.02em;}
+.hd-sub{font-size:13px;color:#cbbfae;line-height:1.6;margin-top:4px;}
+.badge{display:inline-block;background:var(--amber);color:#fff;font-size:12px;font-weight:700;
+  border-radius:999px;padding:2px 10px;line-height:1.6;white-space:nowrap;}
+main{padding:16px 14px 24px;max-width:640px;margin:0 auto;}
+.panel{display:none;} .panel.on{display:block;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:14px 14px 12px;margin:0 0 14px;overflow:hidden;}
+.card{border-left:4px solid var(--accent,var(--line));}
+.card-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.emo{font-size:20px;line-height:1;}
+.card-ttl{font-size:17px;font-weight:700;}
+.card-sub{font-size:12px;color:var(--ink2);}
+.blk{border-top:1px dashed var(--line);padding-top:8px;margin-top:8px;}
+.blk:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+.blk-ttl{font-size:13px;font-weight:700;color:var(--ink2);letter-spacing:.04em;
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.big{font-size:22px;font-weight:700;margin:2px 0 4px;}
+.big .unit{font-size:13px;font-weight:400;color:var(--ink2);}
+.up{color:var(--up);} .down{color:var(--down);} .flat{color:var(--ink2);}
+.muted{color:var(--ink2);font-size:14px;margin:4px 0;}
+.tiny{font-size:12px;color:var(--ink2);}
+ul.plain{list-style:none;margin:6px 0 2px;padding:0;}
+ul.plain li{padding:6px 0;border-bottom:1px solid var(--line);font-size:15px;}
+ul.plain li:last-child{border-bottom:none;}
+.why{font-size:12.5px;color:var(--ink2);line-height:1.7;margin-top:2px;}
+.mini{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink2);}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0 2px;}
+table{border-collapse:collapse;width:100%;min-width:100%;font-size:14px;}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
+th{font-size:12px;color:var(--ink2);font-weight:700;white-space:nowrap;background:var(--card2);}
+td.r,th.r{text-align:right;white-space:nowrap;}
+td.nw{white-space:nowrap;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.vs-row{display:flex;gap:10px;}
+.vs-col{flex:1 1 0;background:var(--card2);border:1px solid var(--line);border-radius:12px;
+  padding:10px;border-top:3px solid var(--accent);min-width:0;}
+.vs-ttl{font-size:12.5px;color:var(--ink2);font-weight:700;}
+.vs-num{font-size:20px;font-weight:700;line-height:1.4;}
+.chartwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:12px;color:var(--ink2);}
+.legend .lg{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block;}
+.legend i.dashed{background:repeating-linear-gradient(90deg,#b9ada0 0 4px,transparent 4px 8px);}
+details.gloss{padding:12px 14px;border-left:4px solid var(--amber);}
+details.gloss summary{font-weight:700;cursor:pointer;font-size:15px;list-style:none;}
+details.gloss summary::-webkit-details-marker{display:none;}
+details.gloss summary::after{content:" ▼";font-size:11px;color:var(--ink2);}
+details.gloss[open] summary::after{content:" ▲";}
+dl{margin:8px 0 0;} dt{font-weight:700;font-size:14.5px;margin-top:8px;}
+dd{margin:0;font-size:13.5px;color:var(--ink2);line-height:1.75;}
+.rules h2{font-size:18px;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--amber-l);}
+.rules h3{font-size:16px;margin:14px 0 4px;color:var(--amber-d);}
+.rules h4{font-size:14.5px;margin:12px 0 4px;color:var(--ink2);}
+.rules p{margin:6px 0;font-size:14.5px;}
+.rules p.cont{margin:0 0 4px 1em;font-size:13px;color:var(--ink2);}
+.rules ul,.rules ol{margin:6px 0;padding-left:1.3em;}
+.rules li{font-size:14.5px;margin:3px 0;}
+.rules blockquote{margin:8px 0;padding:8px 12px;background:var(--card2);
+  border-left:3px solid var(--line);font-size:14px;color:var(--ink2);}
+.rules hr{border:none;border-top:1px solid var(--line);margin:16px 0;}
+.rules code{background:var(--amber-l);border-radius:4px;padding:1px 5px;font-size:12.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;}
+.rules a{word-break:break-all;}
+.sec-ttl{font-size:15px;font-weight:700;margin:18px 0 8px;color:var(--ink2);letter-spacing:.04em;}
+.sec-ttl:first-child{margin-top:0;}
+.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(255,255,255,.96);
+  backdrop-filter:saturate(180%) blur(10px);border-top:1px solid var(--line);
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:20;}
+.tabbar button{flex:1 1 0;background:none;border:none;font-family:inherit;font-size:11.5px;
+  color:var(--ink2);padding:6px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px;justify-content:center;}
+.tabbar button .ic{font-size:20px;line-height:1;}
+.tabbar button[aria-selected="true"]{color:var(--amber-d);font-weight:700;}
+.foot{font-size:12px;color:var(--ink2);text-align:center;margin:18px 0 0;line-height:1.8;}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd-row">
+    <span class="hd-title">🪔 紙トレ手帳</span>
+    <span class="badge">紙（仮想）・実弾なし</span>
+  </div>
+  <div class="hd-sub">最終更新 09/04 13:04　／　本物のお金は1円も動かしていません。実発注も通知もしません。</div>
+</header>
+<main>
+  <section class="panel on" id="panel-kyou">
+    <section class="card vs"><div class="card-hd"><span class="emo">⚖️</span><span class="card-ttl">あかり vs あかりR</span><span class="card-sub">同じ元手5万円で、順張りと逆張りを並走中</span></div><div class="vs-row"><div class="vs-col" style="--accent:#c8791f"><div class="vs-ttl">あかり（順張り）</div><div class="vs-num down">¥-3,561</div><div class="tiny">勝率 27.8%／18件（5勝13敗）</div></div><div class="vs-col" style="--accent:#4f7cac"><div class="vs-ttl">あかりR（逆張り）</div><div class="vs-num flat">¥+0</div><div class="tiny">勝率 —／0件（0勝0敗）</div></div></div><div class="mini">差分（あかりR − あかり）＝<span class="up">¥+3,561</span>　勝率差 —（どちらかが決済0件）</div></section><section class="card kenri"><div class="card-hd"><span class="emo">📅</span><span class="card-ttl">次の権利付き最終日</span><span class="card-sub">この日に持っていると配当の権利がもらえる</span></div><ul class="plain"><li>T = <strong>2026-09-28</strong>（権利確定日 2026-09-30 / 権利落ち日 2026-09-29）</li><li>買い予定日 T-1 = 2026-09-25　※T-1とTの間に週末を跨ぐ（週末持ち越しになる）</li></ul></section><div class="sec-ttl">4つの戦略のきょう</div><div class="card" style="--accent:#c8791f"><div class="card-hd"><span class="emo">🔥</span><span class="card-ttl">あかり</span><span class="card-sub">順張り・急騰の翌朝に買う</span></div><div class="blk"><div class="blk-ttl">きょうの決済</div><p class="muted">なし（きょうは決済していません）</p></div><div class="blk"><div class="blk-ttl">きょうの選定</div><ul class="plain"><li><b>4056</b> ニューラルグループ <span class="tiny">想定5日</span><div class="why">20日平均比38.73倍の出来高急増と当日+29.02%で直近高値を明確に上抜け。株価289円で許容レンジ(100〜1000円)内、上場2202日で新規上場除外に該当せず、当日上昇率も+50%未満で追いかけ規定内。</div></li></ul></div><div class="blk"><div class="blk-ttl">建玉（いま持っている株）<span class="tiny">5 / 5</span></div><div class="tw"><table><thead><tr><th>銘柄</th><th class="r">買値</th><th class="r">現在値</th><th class="r">含み</th><th class="r">含み損益</th></tr></thead><tbody><tr><td><b>5029</b><br><span class="tiny">サークレイス／10株</span></td><td class="r">940.0</td><td class="r">894.0</td><td class="r down">-4.89%</td><td class="r down">¥-469</td></tr><tr><td><b>3646</b><br><span class="tiny">駅探／26株</span></td><td class="r">380.0</td><td class="r">354.0</td><td class="r down">-6.84%</td><td class="r down">¥-686</td></tr><tr><td><b>8912</b><br><span class="tiny">エリアクエスト／58株</span></td><td class="r">170.0</td><td class="r">164.0</td><td class="r down">-3.53%</td><td class="r down">¥-358</td></tr><tr><td><b>8247</b><br><span class="tiny">大和／29株</span></td><td class="r">341.0</td><td class="r">322.0</td><td class="r down">-5.57%</td><td class="r down">¥-561</td></tr><tr><td><b>4056</b><br><span class="tiny">ニューラルグループ／25株</span></td><td class="r">289.0</td><td class="r">289.0</td><td class="r flat">+0.00%</td><td class="r down">¥-7</td></tr></tbody></table></div></div><div class="blk"><div class="blk-ttl">未約定の予約</div><p class="muted">なし</p></div><div class="mini">通算 <span class="down">¥-3,561</span>　評価額 ¥44,358　5勝13敗</div></div><div class="card" style="--accent:#4f7cac"><div class="card-hd"><span class="emo">🌙</span><span class="card-ttl">あかりR</span><span class="card-sub">逆張り・大きく下げた翌朝に買う</span></div><div class="blk"><div class="blk-ttl">きょうの決済</div><p class="muted">なし（きょうは決済していません）</p></div><div class="blk"><div class="blk-ttl">きょうの選定</div><p class="muted">なし（条件に合う銘柄がありませんでした）</p></div><div class="blk"><div class="blk-ttl">建玉（いま持っている株）<span class="tiny">0 / 5</span></div><p class="muted">なし（いまは1銘柄も持っていません）</p></div><div class="blk"><div class="blk-ttl">未約定の予約</div><p class="muted">なし</p></div><div class="mini">通算 <span class="flat">¥+0</span>　評価額 ¥50,000　0勝0敗</div></div><div class="card" style="--accent:#7a9a55"><div class="card-hd"><span class="emo">🎫</span><span class="card-ttl">権利付き最終日</span><span class="card-sub">配当の権利を取る日だけ持つ</span></div><div class="blk"><div class="blk-ttl">きょうの決済</div><p class="muted">なし（きょうは決済していません）</p></div><div class="blk"><div class="blk-ttl">きょうの選定</div><p class="muted">なし（条件に合う銘柄がありませんでした）</p></div><div class="blk"><div class="blk-ttl">建玉（いま持っている株）<span class="tiny">0 / 5</span></div><p class="muted">なし（いまは1銘柄も持っていません）</p></div><div class="blk"><div class="blk-ttl">未約定の予約</div><p class="muted">なし</p></div><div class="mini">通算 <span class="flat">¥+0</span>　評価額 ¥50,000　0勝0敗</div></div><div class="card" style="--accent:#a06a9a"><div class="card-hd"><span class="emo">📰</span><span class="card-ttl">PEAD</span><span class="card-sub">上方修正が出た翌朝に買う</span></div><div class="blk"><div class="blk-ttl">きょうの決済</div><p class="muted">なし（きょうは決済していません）</p></div><div class="blk"><div class="blk-ttl">きょうの選定</div><p class="muted">なし（条件に合う銘柄がありませんでした）</p></div><div class="blk"><div class="blk-ttl">建玉（いま持っている株）<span class="tiny">0 / 6</span></div><p class="muted">なし（いまは1銘柄も持っていません）</p></div><div class="blk"><div class="blk-ttl">未約定の予約</div><p class="muted">なし</p></div><div class="mini">通算 <span class="flat">¥+0</span>　評価額 ¥50,000　0勝0敗</div></div><details class="card gloss"><summary>📚 用語のミニ辞典（はじめての人へ）</summary><dl><dt>紙トレ（ペーパートレード）</dt><dd>本物のお金は1円も動かさず、「もし買っていたら」を記録するだけの練習。この手帳は全部これ。</dd><dt>含み損益（ふくみそんえき）</dt><dd>まだ売っていない株の、いまの時点での損得。売って初めて確定するので、日々ふらふら動く。</dd><dt>実現損益（じつげんそんえき）</dt><dd>実際に売って確定した損得。手数料を引いたあとの数字。</dd><dt>寄り（より）</dt><dd>その日いちばん最初に取引が成立する値段＝始値（はじめね）のこと。朝9時ちょうど。</dd><dt>権利付き最終日</dt><dd>配当や株主優待をもらう権利が確定する、最後の営業日。この日の取引終了時点で株を持っていればもらえる。翌営業日（権利落ち日）には、配当ぶんだけ株価が下がりやすい。</dd><dt>損切り（そんぎり）</dt><dd>決めた線まで下がったら、それ以上ふくらむ前に売ること。この紙トレでは自動で決めている。</dd><dt>トレーリング</dt><dd>上がったあと、高値からいくら下がったら売る、という追いかけ式の売り方。</dd><dt>建玉（たてぎょく）</dt><dd>いま持っている株のこと。</dd></dl></details><p class="foot">レポート日付：あかり 2026-09-03／アノマリー 2026-09-04<br>この手帳は data/ のレポートと stats を読んで作っています。<br>数字が取れないところは「—」と出しています（推測では埋めません）。</p>
+  </section>
+  <section class="panel" id="panel-seiseki">
+    <section class="card" style="--accent:var(--amber)"><div class="card-hd"><span class="emo">🧮</span><span class="card-ttl">通算のなりゆき</span><span class="card-sub">戦略ごとに元手5万円・独立</span></div><div class="tw"><table><thead><tr><th>戦略</th><th class="r">実現損益</th><th class="r">勝率</th><th class="r">決済</th><th class="r">評価額</th><th class="r">現金</th><th class="r">手数料</th></tr></thead><tbody><tr><td><span class="dot" style="background:#c8791f"></span><b>あかり</b></td><td class="r down">¥-3,561</td><td class="r">27.8%</td><td class="r">18件<br><span class="tiny">5勝13敗</span></td><td class="r">¥44,358</td><td class="r">¥139</td><td class="r">¥396</td></tr><tr><td><span class="dot" style="background:#4f7cac"></span><b>あかりR</b></td><td class="r flat">¥+0</td><td class="r">—</td><td class="r">0件<br><span class="tiny">0勝0敗</span></td><td class="r">¥50,000</td><td class="r">¥50,000</td><td class="r">¥0</td></tr><tr><td><span class="dot" style="background:#7a9a55"></span><b>権利付き最終日</b></td><td class="r flat">¥+0</td><td class="r">—</td><td class="r">0件<br><span class="tiny">0勝0敗</span></td><td class="r">¥50,000</td><td class="r">¥50,000</td><td class="r">¥0</td></tr><tr><td><span class="dot" style="background:#a06a9a"></span><b>PEAD</b></td><td class="r flat">¥+0</td><td class="r">—</td><td class="r">0件<br><span class="tiny">0勝0敗</span></td><td class="r">¥50,000</td><td class="r">¥50,000</td><td class="r">¥0</td></tr></tbody></table></div></section><section class="card" style="--accent:var(--amber)"><div class="card-hd"><span class="emo">📉</span><span class="card-ttl">評価額の推移</span><span class="card-sub">日次レポートの評価額を並べたもの</span></div><div class="chartwrap"><svg viewBox="0 0 640 260" role="img" aria-label="戦略ごとの評価額の推移" style="width:100%;height:auto;display:block;min-width:320px;"><line x1="58.0" y1="230.0" x2="628.0" y2="230.0" stroke="#e6ded2" stroke-width="1"/><text x="52.0" y="234.0" text-anchor="end" font-size="11" fill="#8a8175">¥42,240</text><line x1="58.0" y1="122.0" x2="628.0" y2="122.0" stroke="#e6ded2" stroke-width="1"/><text x="52.0" y="126.0" text-anchor="end" font-size="11" fill="#8a8175">¥53,218</text><line x1="58.0" y1="14.0" x2="628.0" y2="14.0" stroke="#e6ded2" stroke-width="1"/><text x="52.0" y="18.0" text-anchor="end" font-size="11" fill="#8a8175">¥64,196</text><line x1="58.0" y1="153.7" x2="628.0" y2="153.7" stroke="#b9ada0" stroke-width="1" stroke-dasharray="4 4"/><text x="58.0" y="252.0" font-size="11" fill="#8a8175">8/4</text><text x="628.0" y="252.0" text-anchor="end" font-size="11" fill="#8a8175">9/4</text><polyline points="58.0,153.8 83.9,130.3 109.8,129.9 135.7,97.9 161.6,61.4 187.5,61.5 213.5,34.9 239.4,84.3 265.3,90.5 291.2,94.5 317.1,110.0 343.0,116.7 368.9,108.8 394.8,116.3 420.7,95.0 446.6,89.8 472.5,149.0 498.5,147.9 524.4,154.3 550.3,165.2 576.2,203.3 602.1,209.1" fill="none" stroke="#c8791f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="602.1" cy="209.1" r="3" fill="#c8791f"/><circle cx="628.0" cy="153.7" r="3.5" fill="#4f7cac"/><circle cx="628.0" cy="153.7" r="3.5" fill="#7a9a55"/><circle cx="628.0" cy="153.7" r="3.5" fill="#a06a9a"/></svg></div><div class="legend"><span class="lg"><i style="background:#c8791f"></i>あかり</span><span class="lg"><i style="background:#4f7cac"></i>あかりR</span><span class="lg"><i style="background:#7a9a55"></i>権利付き最終日</span><span class="lg"><i style="background:#a06a9a"></i>PEAD</span><span class="lg"><i class="dashed"></i>元手 ¥50,000</span></div></section><section class="card" style="--accent:var(--amber)"><div class="card-hd"><span class="emo">🧾</span><span class="card-ttl">決済の履歴</span></div><div class="tw"><table><thead><tr><th>決済日</th><th>戦略</th><th>銘柄</th><th class="r">買値</th><th class="r">売値</th><th class="r">損益</th><th>理由</th></tr></thead><tbody><tr><td class="nw">9/2</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>150A</b><br><span class="tiny">ＪＳＨ／13株</span></td><td class="r">764.0</td><td class="r">741.0</td><td class="r down">¥-319</td><td class="tiny">time_stop_10_business_days</td></tr><tr><td class="nw">9/2</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>6046</b><br><span class="tiny">リンクバル／58株</span></td><td class="r">170.0</td><td class="r">149.0</td><td class="r down">¥-1,236</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">9/2</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>7694</b><br><span class="tiny">いつも／13株</span></td><td class="r">727.0</td><td class="r">592.0</td><td class="r down">¥-1,772</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">9/1</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>5131</b><br><span class="tiny">リンカーズ／74株</span></td><td class="r">135.0</td><td class="r">123.0</td><td class="r down">¥-907</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">9/1</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>7810</b><br><span class="tiny">クロスフォー／54株</span></td><td class="r">183.0</td><td class="r">164.0</td><td class="r down">¥-1,045</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/28</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>3277</b><br><span class="tiny">サンセイランディック／11株</span></td><td class="r">871.0</td><td class="r">809.0</td><td class="r down">¥-700</td><td class="tiny">time_stop_10_business_days</td></tr><tr><td class="nw">8/27</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>4170</b><br><span class="tiny">Ｋａｉｚｅｎ　Ｐｌａｔｆｏｒｍ／58株</span></td><td class="r">172.0</td><td class="r">151.0</td><td class="r down">¥-1,237</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/26</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>6574</b><br><span class="tiny">コンヴァノ／79株</span></td><td class="r">126.0</td><td class="r">112.0</td><td class="r down">¥-1,125</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/25</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>4406</b><br><span class="tiny">新日本理化／40株</span></td><td class="r">248.0</td><td class="r">251.0</td><td class="r up">¥+100</td><td class="tiny">time_stop_10_business_days</td></tr><tr><td class="nw">8/24</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>2936</b><br><span class="tiny">ベースフード／36株</span></td><td class="r">275.0</td><td class="r">274.0</td><td class="r down">¥-56</td><td class="tiny">time_stop_10_business_days</td></tr><tr><td class="nw">8/24</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>4234</b><br><span class="tiny">サンエー化研／12株</span></td><td class="r">792.0</td><td class="r">967.0</td><td class="r up">¥+2,079</td><td class="tiny">time_stop_10_business_days</td></tr><tr><td class="nw">8/18</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>3936</b><br><span class="tiny">グローバルウェイ／54株</span></td><td class="r">185.0</td><td class="r">164.0</td><td class="r down">¥-1,153</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/17</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>3895</b><br><span class="tiny">ハビックス／17株</span></td><td class="r">569.0</td><td class="r">503.0</td><td class="r down">¥-1,140</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/14</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>3323</b><br><span class="tiny">レカム／98株</span></td><td class="r">102.0</td><td class="r">92.0</td><td class="r down">¥-999</td><td class="tiny">stop_loss_-8pct</td></tr><tr><td class="nw">8/13</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>4052</b><br><span class="tiny">フィーチャ／26株</span></td><td class="r">380.0</td><td class="r">583.0</td><td class="r up">¥+5,253</td><td class="tiny">trailing_high_-5pct</td></tr><tr><td class="nw">8/12</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>3422</b><br><span class="tiny">Ｊ−ＭＡＸ／16株</span></td><td class="r">603.0</td><td class="r">662.0</td><td class="r up">¥+924</td><td class="tiny">trailing_high_-5pct</td></tr><tr><td class="nw">8/7</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>9444</b><br><span class="tiny">トーシンホールディングス／33株</span></td><td class="r">298.0</td><td class="r">315.0</td><td class="r up">¥+541</td><td class="tiny">trailing_high_-5pct</td></tr><tr><td class="nw">8/6</td><td class="nw"><span class="dot" style="background:#c8791f"></span>あかり</td><td><b>4073</b><br><span class="tiny">ジィ・シィ企画／15株</span></td><td class="r">629.0</td><td class="r">579.0</td><td class="r down">¥-768</td><td class="tiny">trailing_high_-5pct</td></tr></tbody></table></div><p class="tiny muted">新しい順・全18件</p></section>
+  </section>
+  <section class="panel" id="panel-rule">
+    <section class="card rules" style="--accent:var(--amber)"><div class="card-hd"><span class="emo">📖</span><span class="card-ttl">あかり（順張り）のルール</span><span class="card-sub">config/jp_swing_rules.md</span></div><h2>日本株スイング紙トレ ルール（まさみ編集用）</h2>
+<p>このファイルは毎朝の銘柄選定時に全文をAIへ渡す。変更したルールは次回の選定から反映する。<br>これは紙（仮想約定）専用で、実発注・証券API接続・通知は行わない。</p>
+<h3>資金と建玉</h3>
+<ul>
+<li>仮想資金は5万円で開始する（小銭から稼ぐスタイル）。</li>
+<li>1銘柄の取得金額は1万円を上限とする。1株単位（単元未満株相当）で買う。</li>
+<li>同時建玉は最大5銘柄とする。</li>
+<li>新規選定は1日最大4銘柄とする。</li>
+</ul>
+<h3>入口</h3>
+<ul>
+<li>出来高が平常時より急増し、直近高値や抵抗帯を上抜けた銘柄を優先する。</li>
+<li>上場から1年未満の銘柄は除外する。</li>
+<li>株価100円未満の銘柄は除外する。</li>
+<li>株価1,000円超の銘柄は除外する（低位株専門。高い株は買わない）。</li>
+<li>当日の上昇率が+50%を超えた銘柄は追いかけない。</li>
+<li>候補データに無い価格・時刻・出来高・上場日を推測で補わない。不明な値は不明として扱う。</li>
+<li>条件に合う銘柄が無い日は「選定なし」でよい。</li>
+</ul>
+<h3>出口（プログラム固定）</h3>
+<ul>
+<li>エントリー価格から-8%で逆指値の仮想決済。</li>
+<li>+10%到達後は、到達後の最高値から-5%でトレーリング仮想決済。</li>
+<li>10営業日経過で時間切れの仮想決済。</li>
+<li>手数料は往復0.2%（買い0.1%・売り0.1%）を控除する。</li>
+</ul>
+<h3>AIの役割</h3>
+<ul>
+<li>AIは候補から最大4銘柄を選び、理由と想定保有日数をJSONで返す。</li>
+<li>AIは売買を実行しない。本人もこのパイロットの出力を実発注として扱わない。</li>
+<li>AIが不調、JSONが不正、または根拠が弱い場合は安全側で「選定なし」とする。</li>
+</ul></section><section class="card rules" style="--accent:var(--amber)"><div class="card-hd"><span class="emo">📖</span><span class="card-ttl">あかりR / 権利付き最終日 / PEAD のルール</span><span class="card-sub">config/jp_anomaly_rules.md</span></div><h2>日本株アノマリー紙トレ ルール（まさみ編集用）</h2>
+<p>このファイルは3手法（あかりR / 権利付き最終日 / PEAD）の運用ルールを明文化したもの。<br>変更したルールは次回の選定から反映する（コード側の定数は <code>core/jp_anomaly_paper.py</code> の <code>STRATEGIES</code>）。<br>これは紙（仮想約定）専用で、実発注・証券API接続・入金・通知は一切行わない。<br>あかり本体（<code>core/jp_swing_paper.py</code> / <code>config/jp_swing_rules.md</code>）は変更していない（並走比較のため）。</p>
+<h3>全戦略に共通</h3>
+<ul>
+<li>仮想資金は<strong>戦略ごとに独立して5万円</strong>で開始する（あかりと同額）。</li>
+<li>1銘柄の取得金額は1万円を上限とする。1株単位（単元未満株相当）で買う。</li>
+<li>手数料は往復0.2%（買い0.1%・売り0.1%）を控除する。あかりと同じモデル。</li>
+<li>価格・出来高・上場日・配当・適時開示は全てAPI/公開ページの実測。<strong>取れない値は「不明」として扱い、推測で埋めない</strong>。不明が残る銘柄は除外側に倒す。</li>
+<li>条件に合う銘柄が無い日は「選定なし」でよい。</li>
+<li>上場から1年未満の銘柄は全戦略で除外する。</li>
+<li>流動性の床：直近20営業日の平均出来高が <strong>50,000株未満</strong>は除外する。</li>
+<p class="cont">※この5万株という数字に出典はない。うちで決めた床。変えたければここを直す（コード側 <code>LIQUIDITY_MIN_AVG_VOL</code>）。</p>
+</ul>
+<h4>約定モデル（あかりとの唯一の構造的な差分）</h4>
+<p>あかりは 08:45 時点の気配値でそのまま仮想約定する。<br>この3手法はいずれも「<strong>寄り（始値）で買う</strong>」ことが根拠そのものなので、次の2段階にしている。</p>
+<ol>
+<li><code>select</code>（平日 08:46）＝候補抽出と選定だけ。建玉は作らず「約定予約（pending）」に積む。</li>
+<li><code>update</code>（平日 15:46）＝その日の<strong>実際の前場始値</strong>（Yahoo chart APIの日足 open 実測）で仮想約定する。</li>
+</ol>
+<p>始値が取れない銘柄は約定させない。3営業日取れなければ予約を取り消す。<br>このため「あかり vs あかりR」の比較では、約定価格の作り方が違う点を差し引いて読む必要がある。</p>
+<h4>出口の判定タイミング</h4>
+<ul>
+<li>損切りと時間切れの判定は <strong>1日1回（15:46 の <code>update</code>）・終値ベース</strong>。ザラ場中の逆指値は模擬していない。</li>
+<li>したがって「-10%で損切り」は「終値が -10%以下になっていたらその終値で決済」の意味。</li>
+</ul>
+<hr>
+<h3>1. reversal（あかりR・逆張り）</h3>
+<h4>入口</h4>
+<ul>
+<li><strong>前営業日の終値が、前々営業日の終値比で -7%以下</strong>に下落した銘柄。</li>
+<li>株価100円以上1,000円以下。</li>
+<li>上場1年超。</li>
+<li>前営業日の出来高が、その直前20営業日平均<strong>以上</strong>（出来高比 1.00x 以上）。</li>
+<li><strong>固有悪材料の除外</strong>：前営業日15:00以降〜当朝までの適時開示（TDnet 適時開示情報閲覧サービス</li>
+<p class="cont"><a href="https://www.release.tdnet.info/" target="_blank" rel="noopener">https://www.release.tdnet.info/</a> の日次一覧）を読み、次の語がタイトルに含まれる銘柄は除外する。</p>
+<p class="cont">`下方修正 / 減額修正 / 特別損失 / 減損 / 不適切 / 訂正 / 上場廃止 / 監理銘柄 / 特設注意 /</p>
+<p class="cont">債務超過 / 民事再生 / 破産 / 会社更生 / 課徴金 / 行政処分 / 業績予想の修正 / 配当予想の修正 /</p>
+<p class="cont">無配 / 不正 / 調査委員会 / 内部統制`</p>
+<ul>
+<li>「業績予想の修正」はタイトルだけでは上下が判別できないことが多いので、<strong>上方修正と読める語（上方修正・増額修正）が同じタイトルに無ければ悪材料扱い</strong>にする＝除外側に倒す。</li>
+<li><strong>TDnetが取得できなかった日は、その銘柄を全て除外する</strong>（不明なら買わない）。</li>
+</ul>
+<li>1日最大3銘柄。同時建玉は最大5銘柄。</li>
+<li>適格が多い日は、下落率が大きい順に採る。</li>
+</ul>
+<h4>出口</h4>
+<ul>
+<li><strong>5営業日後の終値</strong>で仮想売り（根拠にした検証の条件に合わせる）。</li>
+<li>安全弁として <strong>-10%</strong>（終値ベース）で仮想損切り。</li>
+</ul>
+<h4>根拠（出典と数字）</h4>
+<ul>
+<li>ギャップダウン後の反発（東証2000-2024・157万件）：-2%以上の寄り付きを始値買い・5日後終値売り。</li>
+<p class="cont"><strong>-7%以上で勝率57.8%・平均+3.37%</strong>。</p>
+<p class="cont"><a href="https://www.systemtrade-kabu.com/gap-down-rebound/" target="_blank" rel="noopener">https://www.systemtrade-kabu.com/gap-down-rebound/</a></p>
+<p class="cont">→ <strong>査読なし・手数料明記なし</strong>。</p>
+<li>短期リバーサルの日本実証：Chang, McLeavey &amp; Rhee (1995) / Gunaratne &amp; Yonezawa (1997)</li>
+<p class="cont">年率約11%（東証1955-1990・<strong>サンプルが古い</strong>）。</p>
+<li>日本はモメンタムが弱い／効かない市場との報告（ABEF 2022）</li>
+<p class="cont"><a href="https://www.abef.jp/conf/2022/common/doc/oral/2B02.pdf" target="_blank" rel="noopener">https://www.abef.jp/conf/2022/common/doc/oral/2B02.pdf</a></p>
+<li>ギャップアップ当日買いの不利（＝あかり側の弱点。東証2000-2025・168万件）：</li>
+<p class="cont">+7%以上のギャップアップを始値買い・終値売りで<strong>平均-1.59%・勝率24.2%</strong>、翌日終値まで持って+0.34%・勝率40.6%。</p>
+<p class="cont"><a href="https://www.systemtrade-kabu.com/gap-up-next-day/" target="_blank" rel="noopener">https://www.systemtrade-kabu.com/gap-up-next-day/</a></p>
+<p class="cont">→ <strong>査読なし・手数料なし</strong>。</p>
+</ul>
+<h4>再現性についての注意（調査時の本体判断をそのまま転記）</h4>
+<blockquote>この検証は「寄り付きがGDだった銘柄」を始値で買う＝朝7時時点では寄りが分からないので、そのままは再現不可。</blockquote>
+<blockquote>再現可能な近似＝「前日終値ベースで-7%以上下落＋固有悪材料なし」を翌朝寄りで買う。</blockquote>
+<blockquote>効果の大きさは別物として紙トレで測る。</blockquote>
+<hr>
+<h3>2. kenri（権利付き最終日）</h3>
+<h4>権利日の決め方</h4>
+<ul>
+<li>権利確定日 = <strong>月末</strong>（月末が非営業日ならその月の最終営業日）。まず「月末が権利確定日」の銘柄を対象にする。</li>
+<li><strong>権利付き最終日 T = 権利確定日の2営業日前</strong>。権利落ち日 = T の翌営業日。</li>
+<li>営業日は自前計算する。祝日は内閣府「国民の祝日について」CSV</li>
+<p class="cont">（<a href="https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv" target="_blank" rel="noopener">https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv</a> ）を一次情報として取得し</p>
+<p class="cont"><code>data/jp_holidays_cao.json</code> にキャッシュする。これに加えて JPX の休業日 12/31・1/2・1/3 を足す。</p>
+<li>祝日カレンダーが取れない場合は<strong>権利日を計算しない＝選定なし</strong>にする。</li>
+<li>レポート（<code>data/jp_anomaly_report_latest.md</code>）には常に「次のT」を出す。</li>
+</ul>
+<p><strong>次回：T = 2026-09-28（月）／権利確定日 2026-09-30（水）／権利落ち日 2026-09-29（火）。</strong><br>買い予定日 T-1 = <strong>2026-09-25（金）</strong>。<br>→ <strong>T-1（金）から T（月）までの間に週末を跨ぐ</strong>。土日の持ち越しになる点は承知の上で、紙なので実行する。</p>
+<h4>入口</h4>
+<ul>
+<li><strong>T-1 の寄り（前場始値）</strong>で仮想買い。</li>
+<li>対象：Yahoo で<strong>配当利回りが取れる</strong>銘柄のうち、<strong>権利落ち日（exDividendDate）が上で計算した権利落ち日と一致する</strong>銘柄を、配当利回りの高い順に。</li>
+<ul>
+<li>権利落ち日が取れない／一致しない銘柄は除外（決算月を推測で埋めない）。</li>
+</ul>
+<li>株価100円以上1,000円以下、20日平均出来高 50,000株以上、上場1年超。</li>
+<li>最大5銘柄。</li>
+</ul>
+<h4>出口</h4>
+<ul>
+<li><strong>T の後場寄り（12:30）</strong> で仮想売り。権利落ち日は跨がない。</li>
+<li>12:30 の始値は5分足の実測（Yahoo chart API）。取れなければ決済せず次回の <code>update</code> で再試行する。</li>
+<li>保有が1.5営業日と短いので損切りは置かない。</li>
+</ul>
+<h4>根拠（出典と数字）</h4>
+<ul>
+<li>権利付き最終日効果（東証4083銘柄・45万件）：</li>
+<p class="cont"><strong>権利付き最終日 平均+0.443%・勝率60.7%</strong>、権利落ち日 平均-0.244%・勝率44.4%（3月は-1.528%）。</p>
+<p class="cont"><a href="https://www.systemtrade-kabu.com/ex-dividend-anomaly/" target="_blank" rel="noopener">https://www.systemtrade-kabu.com/ex-dividend-anomaly/</a></p>
+<p class="cont">→ <strong>査読なし</strong>。</p>
+<li>未確認点：権利付き最終日効果の<strong>定量的な査読研究は未発見</strong>（2026-09-04時点）。</li>
+</ul>
+<hr>
+<h3>3. pead（決算後ドリフト・紙の別枠）</h3>
+<p><strong>この戦略は「週末を跨がない」という運用ルールの適用外</strong>（20営業日保有なので週末は必ず跨ぐ）。<br>まさみ承認済みの別枠として、紙でだけ回す。</p>
+<h4>入口</h4>
+<ul>
+<li>トリガー＝<strong>前営業日15:00以降に適時開示で「上方修正」または「増額修正」を出した銘柄</strong>（TDnet日次一覧のタイトル一致）。</li>
+<li><strong>SUE（決算サプライズ）は計算しない。上方修正IRを代理指標として使う</strong>（決算数値の取得と標準化はしない）。</li>
+<li>株価100円以上3,000円以下、20日平均出来高 50,000株以上、上場1年超。</li>
+<li>翌朝（＝開示を検知した当日）の寄りで仮想買い。</li>
+<li>1日最大2銘柄。同時建玉は最大6銘柄。</li>
+<li>TDnetが取れない日は候補なし。</li>
+</ul>
+<h4>出口</h4>
+<ul>
+<li><strong>20営業日後の終値</strong>で仮想売り。</li>
+<li>安全弁として <strong>-10%</strong>（終値ベース）で仮想損切り。</li>
+</ul>
+<h4>根拠（出典と数字）</h4>
+<ul>
+<li>PEADの日本実証：松村尚彦(2010)『行動経済学』第3巻（<strong>査読あり</strong>）／大阪大学DP2125</li>
+<p class="cont"><a href="https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_article/-char/ja/" target="_blank" rel="noopener">https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_article/-char/ja/</a></p>
+<p class="cont"><a href="https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf" target="_blank" rel="noopener">https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf</a></p>
+</ul>
+<hr>
+<h3>未確認事項（調査元の記載をそのまま転記）</h3>
+<ul>
+<li>systemtrade-kabu.com の検証は<strong>査読なし・手数料控除の有無が一部不明</strong>。</li>
+<li>1955-1990年サンプル（短期リバーサル）の現在への当てはまりは未確認。</li>
+<li>低ボラ効果の査読相当論文は本文未読（この3戦略では使っていない）。</li>
+<li>権利付き最終日効果の定量的査読研究は未発見。</li>
+<li>「個人の6〜7割が負ける」等の流通数字は不使用。</li>
+</ul>
+<p>調査元：<code>cura-brain/raw/inbox/2026-09-04_日本株S株向け実証手法調査.md</code>（確認日 2026-09-04）</p>
+<h3>AIの役割</h3>
+<ul>
+<li>この3戦略の選定は<strong>ルールベース</strong>で行い、AI（LLM）の裁量選定は入れていない（あかりとの差分）。</li>
+<p class="cont">同じ条件が揃えば誰が回しても同じ銘柄になる。</p>
+<li>判断が要るのは「ルールを変えるかどうか」だけ。それはこのファイルを直す。</li>
+</ul></section>
+    <p class="foot">ルールは config/ のファイルをそのまま表示しています。<br>直したいときは、そのファイルを編集すると次の選定から反映されます。</p>
+  </section>
+</main>
+<nav class="tabbar" role="tablist">
+  <button type="button" id="tab-kyou" role="tab" aria-selected="true" aria-controls="panel-kyou">
+    <span class="ic">📊</span><span>きょう</span>
+  </button>
+  <button type="button" id="tab-seiseki" role="tab" aria-selected="false" aria-controls="panel-seiseki">
+    <span class="ic">📈</span><span>せいせき</span>
+  </button>
+  <button type="button" id="tab-rule" role="tab" aria-selected="false" aria-controls="panel-rule">
+    <span class="ic">📖</span><span>ルール</span>
+  </button>
+</nav>
+<script>
+(function(){
+  "use strict";
+  var KEY="paper_notebook_tab_v1";
+  var tabs=["kyou","seiseki","rule"];
+  function setTab(name){
+    if(tabs.indexOf(name)<0){name="kyou";}
+    tabs.forEach(function(t){
+      var b=document.getElementById("tab-"+t), p=document.getElementById("panel-"+t);
+      if(!b||!p){return;}
+      var on=(t===name);
+      b.setAttribute("aria-selected",on?"true":"false");
+      p.classList.toggle("on",on);
+    });
+    try{localStorage.setItem(KEY,name);}catch(e){}
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){
+    var b=document.getElementById("tab-"+t);
+    if(b){b.addEventListener("click",function(){setTab(t);});}
+  });
+  var saved="kyou";
+  try{saved=localStorage.getItem(KEY)||"kyou";}catch(e){}
+  setTab(saved);
+})();
+</script>
+</body>
+</html>
